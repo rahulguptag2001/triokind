@@ -1,26 +1,35 @@
-const express = require('express');
+// routes/contact.js
+import express from "express";
+
+import {
+  submitContact,
+  getAllMessages,
+  updateMessageStatus,
+  getTeamMembers,
+} from "../controllers/contactController.js";
+
+import { adminAuth } from "../middleware/auth.js";
+
 const router = express.Router();
-const contactController = require('../controllers/contactController');
-const { adminAuth } = require('../middleware/auth');
 
 // @route   POST /api/contact
 // @desc    Submit contact form
 // @access  Public
-router.post('/', contactController.submitContact);
+router.post("/", submitContact);
 
 // @route   GET /api/contact/messages
 // @desc    Get all contact messages
 // @access  Private/Admin
-router.get('/messages', adminAuth, contactController.getAllMessages);
+router.get("/messages", adminAuth, getAllMessages);
 
 // @route   PUT /api/contact/messages/:id
 // @desc    Update message status
 // @access  Private/Admin
-router.put('/messages/:id', adminAuth, contactController.updateMessageStatus);
+router.put("/messages/:id", adminAuth, updateMessageStatus);
 
 // @route   GET /api/contact/team
 // @desc    Get team members
 // @access  Public
-router.get('/team', contactController.getTeamMembers);
+router.get("/team", getTeamMembers);
 
-module.exports = router;
+export default router;

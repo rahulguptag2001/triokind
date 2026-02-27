@@ -1,29 +1,21 @@
-// config/database.js - MySQL Database Connection
-const mysql = require('mysql2');
-const dotenv = require('dotenv');
+// config/database.js
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create connection pool for better performance
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'trokind_pharmaceuticals',
-  port: Number(process.env.DB_PORT) || 3307,   
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+// Create MySQL connection pool using Railway DATABASE_URL
+const pool = mysql.createPool(process.env.DATABASE_URL);
 
-// Test connection
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error('Error connecting to MySQL database:', err);
-    return;
+// Optional: test connection once at startup
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log("✅ Connected to MySQL database");
+    connection.release();
+  } catch (error) {
+    console.error("❌ Error connecting to MySQL database:", error.message);
   }
-  console.log('Connected to MySQL database');
-  connection.release();
-});
+})();
 
-module.exports = pool.promise();
+export default pool;

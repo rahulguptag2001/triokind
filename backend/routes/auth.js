@@ -1,31 +1,41 @@
-const express = require('express');
+// routes/auth.js
+import express from "express";
+import { body } from "express-validator";
+
+import {
+  register,
+  login,
+  getProfile,
+} from "../controllers/authController.js";
+
+import { auth } from "../middleware/auth.js";
+
 const router = express.Router();
-const { body } = require('express-validator');
-const authController = require('../controllers/authController');
-const { auth } = require('../middleware/auth');
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
 router.post(
-  '/register',
+  "/register",
   [
-    body('email').isEmail().withMessage('Please provide a valid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('firstName').notEmpty().withMessage('First name is required'),
-    body('lastName').notEmpty().withMessage('Last name is required')
+    body("email").isEmail().withMessage("Please provide a valid email"),
+    body("password")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters"),
+    body("firstName").notEmpty().withMessage("First name is required"),
+    body("lastName").notEmpty().withMessage("Last name is required"),
   ],
-  authController.register
+  register
 );
 
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', authController.login);
+router.post("/login", login);
 
 // @route   GET /api/auth/profile
 // @desc    Get user profile
 // @access  Private
-router.get('/profile', auth, authController.getProfile);
+router.get("/profile", auth, getProfile);
 
-module.exports = router;
+export default router;

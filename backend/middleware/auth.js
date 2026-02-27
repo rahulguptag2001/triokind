@@ -1,13 +1,15 @@
-// middleware/auth.js - JWT Authentication Middleware
-const jwt = require('jsonwebtoken');
+// middleware/auth.js - JWT Authentication Middleware (ES Module)
+import jwt from "jsonwebtoken";
 
-const auth = (req, res, next) => {
+export const auth = (req, res, next) => {
   try {
-    // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Get token from Authorization header
+    const token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      return res.status(401).json({ message: 'No token, authorization denied' });
+      return res
+        .status(401)
+        .json({ message: "No token, authorization denied" });
     }
 
     // Verify token
@@ -15,21 +17,17 @@ const auth = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
+    return res.status(401).json({ message: "Token is not valid" });
   }
 };
 
-const adminAuth = (req, res, next) => {
-  try {
-    auth(req, res, () => {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Access denied. Admin only.' });
-      }
-      next();
-    });
-  } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
-  }
+export const adminAuth = (req, res, next) => {
+  auth(req, res, () => {
+    if (req.user?.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Admin only." });
+    }
+    next();
+  });
 };
-
-module.exports = { auth, adminAuth };

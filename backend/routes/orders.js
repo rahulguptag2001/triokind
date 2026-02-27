@@ -1,31 +1,41 @@
-const express = require('express');
+// routes/orders.js
+import express from "express";
+
+import {
+  createOrder,
+  getUserOrders,
+  getOrderById,
+  updateOrderStatus,
+  getAllOrders,
+} from "../controllers/orderController.js";
+
+import { auth, adminAuth } from "../middleware/auth.js";
+
 const router = express.Router();
-const orderController = require('../controllers/orderController');
-const { auth, adminAuth } = require('../middleware/auth');
 
 // @route   POST /api/orders
 // @desc    Create new order
 // @access  Private
-router.post('/', auth, orderController.createOrder);
+router.post("/", auth, createOrder);
 
 // @route   GET /api/orders
 // @desc    Get user orders
 // @access  Private
-router.get('/', auth, orderController.getUserOrders);
+router.get("/", auth, getUserOrders);
 
 // @route   GET /api/orders/:id
 // @desc    Get single order
 // @access  Private
-router.get('/:id', auth, orderController.getOrderById);
+router.get("/:id", auth, getOrderById);
 
 // @route   PUT /api/orders/:id/status
 // @desc    Update order status
 // @access  Private/Admin
-router.put('/:id/status', adminAuth, orderController.updateOrderStatus);
+router.put("/:id/status", adminAuth, updateOrderStatus);
 
 // @route   GET /api/orders/admin/all
 // @desc    Get all orders
 // @access  Private/Admin
-router.get('/admin/all', adminAuth, orderController.getAllOrders);
+router.get("/admin/all", adminAuth, getAllOrders);
 
-module.exports = router;
+export default router;

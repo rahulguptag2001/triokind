@@ -143,6 +143,8 @@ IINSERT INTO products (name, description, price, category_id, manufacturer, dosa
 ('Walcon Syrup', 'Phenylephrine HCl & Chlorpheniramine Maleate - Orange Flavor', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
 ('Electrogreat Energy', 'Instant Energy Booster with Vitamin C & Electrolytes - Orange Flavor', 1.00, 5, 'Triokind Pharmaceutical', '100gm', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
 ('Ibuzaal 60ml', 'Ibuprofen & Paracetamol Suspension - Strawberry Flavor', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0);
+('Bougain Gold syrup', 'Lycopene, Multivitamin & Antioxidant Syrup', 1.00, 5, 'Triokind Pharmaceutical', '225 ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Welcon syrup', 'Phenylephrine and Chlorpheniramine Meleate syrup IP', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1)
 
 -- Insert Sample Team Members
 INSERT INTO team_members (name, position, bio, display_order) VALUES
