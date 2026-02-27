@@ -1,5 +1,5 @@
 // pages/ProductDetail.js - Single Product Detail Page
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
@@ -10,28 +10,28 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/products/${id}`);
       setProduct(response.data);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching product:', error);
+    } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
-    // Cart badge will update automatically - no alert needed
   };
 
   const handleBuyNow = () => {
@@ -40,11 +40,19 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return <div className="loading-container"><p>Loading product...</p></div>;
+    return (
+      <div className="loading-container">
+        <p>Loading product...</p>
+      </div>
+    );
   }
 
   if (!product) {
-    return <div className="error-container"><p>Product not found</p></div>;
+    return (
+      <div className="error-container">
+        <p>Product not found</p>
+      </div>
+    );
   }
 
   return (
@@ -68,23 +76,29 @@ const ProductDetail = () => {
           <div className="product-info-detail">
             <h1 className="product-title">{product.name}</h1>
             <p className="product-manufacturer">By {product.manufacturer}</p>
-            
+
             <div className="product-badges">
-              {product.featured && <span className="badge badge-featured">Featured</span>}
+              {product.featured && (
+                <span className="badge badge-featured">Featured</span>
+              )}
               {product.prescription_required && (
-                <span className="badge badge-prescription">Prescription Required</span>
+                <span className="badge badge-prescription">
+                  Prescription Required
+                </span>
               )}
             </div>
 
-            <div className="product-price-large">${product.price}</div>
+            <div className="product-price-large">₹{product.price}</div>
 
             <div className="product-meta">
               <p><strong>Dosage:</strong> {product.dosage}</p>
               <p><strong>Category:</strong> {product.category_name}</p>
-              <p><strong>Stock:</strong> {product.stock_quantity > 0 ? 
-                `${product.stock_quantity} units available` : 
-                'Out of stock'
-              }</p>
+              <p>
+                <strong>Stock:</strong>{' '}
+                {product.stock_quantity > 0
+                  ? `${product.stock_quantity} units available`
+                  : 'Out of stock'}
+              </p>
             </div>
 
             <div className="product-description">
@@ -96,7 +110,7 @@ const ProductDetail = () => {
               <div className="product-actions">
                 <div className="quantity-selector">
                   <label>Quantity:</label>
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="qty-btn"
                   >
@@ -105,13 +119,21 @@ const ProductDetail = () => {
                   <input
                     type="number"
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    onChange={(e) =>
+                      setQuantity(
+                        Math.max(1, parseInt(e.target.value) || 1)
+                      )
+                    }
                     min="1"
                     max={product.stock_quantity}
                     className="qty-input"
                   />
-                  <button 
-                    onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
+                  <button
+                    onClick={() =>
+                      setQuantity(
+                        Math.min(product.stock_quantity, quantity + 1)
+                      )
+                    }
                     className="qty-btn"
                   >
                     +
@@ -119,10 +141,16 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="action-buttons">
-                  <button onClick={handleAddToCart} className="btn btn-secondary btn-large">
+                  <button
+                    onClick={handleAddToCart}
+                    className="btn btn-secondary btn-large"
+                  >
                     Add to Cart
                   </button>
-                  <button onClick={handleBuyNow} className="btn btn-primary btn-large">
+                  <button
+                    onClick={handleBuyNow}
+                    className="btn btn-primary btn-large"
+                  >
                     Buy Now
                   </button>
                 </div>
@@ -131,7 +159,10 @@ const ProductDetail = () => {
 
             {product.prescription_required && (
               <div className="prescription-notice">
-                <p>⚠️ This product requires a valid prescription. You will need to upload your prescription during checkout.</p>
+                <p>
+                  ⚠️ This product requires a valid prescription. You will need
+                  to upload your prescription during checkout.
+                </p>
               </div>
             )}
           </div>
