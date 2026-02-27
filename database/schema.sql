@@ -124,30 +124,30 @@ INSERT INTO categories (name, description) VALUES
 ('Skin Care', 'Dermatological products and treatments');
 
 -- Insert Sample Products
-INSERT INTO products (name, description, price, category_id, stock_quantity, manufacturer, dosage, prescription_required, featured) VALUES
-('Paracetamol 500mg', 'Effective pain relief and fever reducer for adults and children', 12.99, 1, 500, 'Trokind Labs', '500mg tablets', FALSE, TRUE),
-('Ibuprofen 400mg', 'Anti-inflammatory pain relief medication', 15.49, 1, 450, 'Trokind Labs', '400mg tablets', FALSE, TRUE),
-('Amoxicillin 500mg', 'Broad-spectrum antibiotic for bacterial infections', 24.99, 2, 300, 'Trokind Pharma', '500mg capsules', TRUE, FALSE),
-('Vitamin D3 1000IU', 'Essential vitamin D supplement for bone health', 18.99, 3, 800, 'Trokind Nutrition', '1000IU softgels', FALSE, TRUE),
-('Multivitamin Complex', 'Complete daily multivitamin and mineral formula', 29.99, 3, 600, 'Trokind Nutrition', 'Daily tablets', FALSE, TRUE),
-('Cold & Flu Relief', 'Multi-symptom cold and flu relief formula', 16.99, 4, 400, 'Trokind Care', 'Liquid suspension', FALSE, FALSE),
-('Probiotic Complex', 'Advanced probiotic formula for digestive health', 34.99, 5, 250, 'Trokind Bio', '10 billion CFU', FALSE, FALSE),
-('Omega-3 Fish Oil', 'High-quality omega-3 fatty acids for heart health', 27.99, 6, 500, 'Trokind Nutrition', '1000mg softgels', FALSE, TRUE),
-('Metformin 500mg', 'Medication for type 2 diabetes management', 32.99, 7, 200, 'Trokind Pharma', '500mg tablets', TRUE, FALSE),
-('Aspirin 75mg', 'Low-dose aspirin for cardiovascular protection', 9.99, 6, 700, 'Trokind Labs', '75mg tablets', FALSE, FALSE),
-('Antihistamine 10mg', 'Relief from allergies and hay fever', 13.99, 4, 350, 'Trokind Care', '10mg tablets', FALSE, FALSE),
-('Hydrocortisone Cream 1%', 'Topical treatment for skin inflammation and itching', 11.99, 8, 450, 'Trokind Derm', '1% cream', FALSE, FALSE);
+IINSERT INTO products (name, description, price, category_id, manufacturer, dosage, stock_quantity, image_url, prescription_required, featured) VALUES
+('Welcon Junior', 'Effective Pediatric Cough & Cold Syrup with Dextromethorphan, Phenylephrine and Chlorpheniramine', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Ibuzaal Suspension', 'Ibuprofen & Paracetamol Oral Suspension - Rapid Relief from Fever, Pain & Discomfort', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Rebtom-DSR', 'Rabeprazole & Domperidone Capsules - Fast Relief from Acid Reflux & Dyspepsia', 1.00, 3, 'Triokind Pharmaceutical', '20 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 1),
+('Taskmol-MF', 'Mefenamic Acid & Paracetamol Oral Suspension - Quick Relief from Fever & Pain in Children', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Taskmol-Junior', 'Mefenamic Acid & Paracetamol Suspension - Fast Relief from Fever & Pain', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Taskmol-Plus', 'Aceclofenac & Paracetamol Tablets - Powerful Relief From Pain & Inflammation', 1.00, 2, 'Triokind Pharmaceutical', '20 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Taskmol-SP', 'Aceclofenac, Paracetamol & Serratiopeptidase - Effective Relief from Pain and Inflammation', 1.00, 2, 'Triokind Pharmaceutical', '10 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Pinzyme Syrup', 'Fungal Diastase, Pepsin & Digestive Enzymes - Promotes Better Digestion', 1.00, 4, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Bougain 4G', 'Omega-3 Fatty Acids, Green Tea Extract & Multivitamin Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Bougain Softgel', 'Ginseng, Multivitamin & Antioxidant Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Bougain Gold', 'Lycopene, Multivitamin & Antioxidant Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Aptibon Syrup', 'Cyproheptadine Appetite Stimulant Syrup - Strawberry Flavor', 1.00, 6, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Hepatask Syrup', 'L-Ornithine L-Aspartate Liver Health Syrup - Mango Flavor', 1.00, 7, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Holimentin-625', 'Amoxycillin & Potassium Clavulanate Tablets - Antibiotic', 1.00, 8, 'Triokind Pharmaceutical', '100 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Platogreat Syrup', 'Ayurvedic Probiotic Digestive Health Syrup', 1.00, 4, 'Triokind Pharmaceutical', '500ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Walcon Syrup', 'Phenylephrine HCl & Chlorpheniramine Maleate - Orange Flavor', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Electrogreat Energy', 'Instant Energy Booster with Vitamin C & Electrolytes - Orange Flavor', 1.00, 5, 'Triokind Pharmaceutical', '100gm', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Ibuzaal 60ml', 'Ibuprofen & Paracetamol Suspension - Strawberry Flavor', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0);
 
 -- Insert Sample Team Members
 INSERT INTO team_members (name, position, bio, display_order) VALUES
-('Dr. Sarah Mitchell', 'Chief Executive Officer', 'With over 20 years in pharmaceutical research, Dr. Mitchell leads Trokind with a vision for accessible healthcare.', 1),
-('Dr. James Chen', 'Chief Medical Officer', 'Board-certified physician specializing in clinical research and drug development.', 2),
-('Emily Rodriguez', 'Director of Operations', 'Expert in pharmaceutical supply chain management with 15 years of experience.', 3),
-('Michael Anderson', 'Head of Research & Development', 'Leading innovative research in next-generation pharmaceutical solutions.', 4),
-('Dr. Priya Patel', 'Quality Assurance Director', 'Ensuring the highest standards in pharmaceutical manufacturing and safety.', 5),
-('David Thompson', 'Marketing Director', 'Strategic marketing professional dedicated to making healthcare accessible.', 6);
+('Deepak Narayan', 'Chief Executive Officer', '.', 1),
 
--- Insert Sample Admin User (password: admin123 - hashed with bcrypt)
 -- Note: This is just a placeholder. Actual password will be hashed by the backend
 INSERT INTO users (first_name, last_name, email, password, role) VALUES
 ('Admin', 'User', 'admin@trokind.com', '$2a$10$placeholder', 'admin');
