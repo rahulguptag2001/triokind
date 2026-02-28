@@ -4,34 +4,32 @@ import pool from "../config/database.js";
 // Create new order
 export const createOrder = async (req, res) => {
   try {
-    const { totalAmount, items, address } = req.body;
+    const { address, totalAmount } = req.body;
+
+    // 🔴 VALIDATION
+    if (!address || address.trim() === "") {
+      return res.status(400).json({ message: "Address is required" });
+    }
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.status(400).json({ message: "Invalid total amount" });
+    }
 
     const [result] = await pool.query(
       `INSERT INTO orders (user_id, total_amount, address, status)
-       VALUES (?, ?, ?, 'pending')`,
-      [req.user.id, totalAmount, address]
+       VALUES (?, ?, ?, ?)`,
+      [req.user.id, totalAmount, address, "pending"]
     );
 
-    const orderId = result.insertId;
-
-    for (const item of items) {
-      await pool.query(
-        `INSERT INTO order_items (order_id, product_id, quantity, price)
-         VALUES (?, ?, ?, ?)`,
-        [orderId, item.product_id, item.quantity, item.price]
-      );
-    }
-
     res.status(201).json({
-      message: "Order created successfully",
-      orderId,
+      message: "Order placed successfully",
+      orderId: result.insertId,
     });
   } catch (error) {
     console.error("Create order error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Failed to create order" });
   }
 };
-
 // Get orders for logged-in user
 export const getUserOrders = async (req, res) => {
   try {
