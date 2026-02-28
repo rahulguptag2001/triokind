@@ -48,12 +48,12 @@ const Orders = () => {
                 <span className={`status-badge status-${order.status}`}>{order.status}</span>
               </div>
               <p>Date: {new Date(order.order_date).toLocaleDateString()}</p>
-              <p>Total: ${order.total_amount}</p>
+              <p>Total: ₹{order.total_amount}</p>
               <div className="order-items">
                 {order.items && order.items.map(item => (
                   <div key={item.id} className="order-item">
                     <span>{item.name} x {item.quantity}</span>
-                    <span>${item.price}</span>
+                    <span>₹{item.price}</span>
                   </div>
                 ))}
               </div>
