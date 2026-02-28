@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from "../api/axios";
 import { useCart } from '../context/CartContext';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -18,7 +18,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, formData);
+      const response = await api.post("/auth/login", data);;
       login(response.data.user, response.data.token);
       navigate('/products');
     } catch (err) {

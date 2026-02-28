@@ -37,7 +37,17 @@ export const register = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(201).json({ token });
+    // ✅ IMPORTANT: return user + token
+    res.status(201).json({
+      token,
+      user: {
+        id: result.insertId,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        role: "user",
+      },
+    });
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ message: "Server error" });
@@ -71,30 +81,19 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    // ✅ IMPORTANT: return user + token
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role,
+      },
+    });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Get logged-in user profile
-export const getProfile = async (req, res) => {
-  try {
-    const [users] = await pool.query(
-      `SELECT id, email, first_name, last_name, role
-       FROM users
-       WHERE id = ?`,
-      [req.user.id]
-    );
-
-    if (users.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(users[0]);
-  } catch (error) {
-    console.error("Get profile error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
