@@ -16,18 +16,30 @@ export const CartProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
+useEffect(() => {
+  const savedCart = localStorage.getItem('cart');
+  if (savedCart) {
+    try {
       setCartItems(JSON.parse(savedCart));
+    } catch {
+      localStorage.removeItem('cart');
     }
+  }
 
-    const savedUser = localStorage.getItem('user');
-    const savedToken = localStorage.getItem('token');
-    if (savedUser && savedToken) {
+  const savedUser = localStorage.getItem('user');
+  const savedToken = localStorage.getItem('token');
+
+  if (savedUser && savedUser !== "undefined" && savedToken) {
+    try {
       setUser(JSON.parse(savedUser));
+    } catch (err) {
+      console.error("Invalid user in localStorage, clearing...");
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      setUser(null);
     }
-  }, []);
+  }
+}, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
