@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from "../api/axios";
 import { useCart } from '../context/CartContext';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
