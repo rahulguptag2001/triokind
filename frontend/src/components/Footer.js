@@ -35,12 +35,32 @@ const Footer = () => {
         </div>
 
         <div className="footer-section">
-          <h3>Contact Us</h3>
-          <p>📧 triokindpharmaceuticalspvtltd@gmail.com</p>
-          <p>📞 9582878282</p>
-          <p>Office Address- SHOP NO. 3 FIRST FLOOR SEC A-9 PKT-4 CSC MARKET,Narela,110040</p>
-          <p>Permanent Address- H.NO-44 POCKET-4,SECTOR-A/6 PUNARVAS COLONY, Narela New Delhi,110040 </p>
-        </div>
+  <h3>Contact Us</h3>
+
+  <p>
+    📧{" "}
+    <a href="mailto:triokindpharmaceuticalspvtltd@gmail.com">
+      triokindpharmaceuticalspvtltd@gmail.com
+    </a>
+  </p>
+
+  <p>
+    📞{" "}
+    <a href="tel:+919582878282">
+      9582878282
+    </a>
+  </p>
+
+  <p>
+    <strong>Office Address:</strong><br />
+    SHOP NO. 3 FIRST FLOOR SEC A-9 PKT-4 CSC MARKET, Narela, 110040
+  </p>
+
+  <p>
+    <strong>Permanent Address:</strong><br />
+    H.NO-44 POCKET-4, SECTOR-A/6 PUNARVAS COLONY, Narela, New Delhi, 110040
+  </p>
+</div>
       </div>
       <div className="whatsapp-float">
         <a 
