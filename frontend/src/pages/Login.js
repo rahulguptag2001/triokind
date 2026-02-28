@@ -12,21 +12,21 @@ const Login = () => {
   const { login } = useCart();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await api.post("/auth/login", data);;
-      login(response.data.user, response.data.token);
-      navigate('/products');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await api.post("/auth/login", formData);
+    login(response.data.user, response.data.token);
+    navigate("/products");
+  } catch (err) {
+    setError(err.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page">
