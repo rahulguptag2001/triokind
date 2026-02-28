@@ -35,7 +35,7 @@ const ProductCard = ({ product }) => {
           <p className="product-dosage">{product.dosage}</p>
           
           <div className="product-footer">
-            <span className="product-price">${product.price}</span>
+            <span className="product-price">₹{product.price}</span>
             <button 
               className="btn btn-primary btn-small"
               onClick={handleAddToCart}

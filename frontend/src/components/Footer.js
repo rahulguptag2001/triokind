@@ -38,7 +38,8 @@ const Footer = () => {
           <h3>Contact Us</h3>
           <p>📧 triokindpharmaceuticalspvtltd@gmail.com</p>
           <p>📞 9582878282</p>
-          <p>📍 123 Pharma Street, Medical City</p>
+          <p>Office Address- SHOP NO. 3 FIRST FLOOR SEC A-9 PKT-4 CSC MARKET,Narela,110040</p>
+          <p>Permanent Address- </p>
         </div>
       </div>
       <div className="whatsapp-float">

@@ -1,8 +1,8 @@
--- Trokind Pharmaceuticals Database Schema
+-- Triokind Pharmaceuticals Database Schema
 
 -- Create Database
-CREATE DATABASE IF NOT EXISTS trokind_pharmaceuticals;
-USE trokind_pharmaceuticals;
+CREATE DATABASE IF NOT EXISTS triokind_pharmaceuticals;
+USE triokind_pharmaceuticals;
 
 -- Users Table
 CREATE TABLE users (
@@ -107,7 +107,6 @@ CREATE TABLE team_members (
     bio TEXT,
     image_url VARCHAR(500),
     email VARCHAR(100),
-    linkedin_url VARCHAR(200),
     display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -124,35 +123,39 @@ INSERT INTO categories (name, description) VALUES
 ('Skin Care', 'Dermatological products and treatments');
 
 -- Insert Sample Products
-IINSERT INTO products (name, description, price, category_id, manufacturer, dosage, stock_quantity, image_url, prescription_required, featured) VALUES
-('Welcon Junior', 'Effective Pediatric Cough & Cold Syrup with Dextromethorphan, Phenylephrine and Chlorpheniramine', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Ibuzaal Suspension', 'Ibuprofen & Paracetamol Oral Suspension - Rapid Relief from Fever, Pain & Discomfort', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Rebtom-DSR', 'Rabeprazole & Domperidone Capsules - Fast Relief from Acid Reflux & Dyspepsia', 1.00, 3, 'Triokind Pharmaceutical', '20 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 1),
-('Taskmol-MF', 'Mefenamic Acid & Paracetamol Oral Suspension - Quick Relief from Fever & Pain in Children', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Taskmol-Junior', 'Mefenamic Acid & Paracetamol Suspension - Fast Relief from Fever & Pain', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Taskmol-Plus', 'Aceclofenac & Paracetamol Tablets - Powerful Relief From Pain & Inflammation', 1.00, 2, 'Triokind Pharmaceutical', '20 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
-('Taskmol-SP', 'Aceclofenac, Paracetamol & Serratiopeptidase - Effective Relief from Pain and Inflammation', 1.00, 2, 'Triokind Pharmaceutical', '10 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
-('Pinzyme Syrup', 'Fungal Diastase, Pepsin & Digestive Enzymes - Promotes Better Digestion', 1.00, 4, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Bougain 4G', 'Omega-3 Fatty Acids, Green Tea Extract & Multivitamin Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Bougain Softgel', 'Ginseng, Multivitamin & Antioxidant Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Bougain Gold', 'Lycopene, Multivitamin & Antioxidant Softgel Capsules', 1.00, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Aptibon Syrup', 'Cyproheptadine Appetite Stimulant Syrup - Strawberry Flavor', 1.00, 6, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
-('Hepatask Syrup', 'L-Ornithine L-Aspartate Liver Health Syrup - Mango Flavor', 1.00, 7, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
-('Holimentin-625', 'Amoxycillin & Potassium Clavulanate Tablets - Antibiotic', 1.00, 8, 'Triokind Pharmaceutical', '100 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
-('Platogreat Syrup', 'Ayurvedic Probiotic Digestive Health Syrup', 1.00, 4, 'Triokind Pharmaceutical', '500ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Walcon Syrup', 'Phenylephrine HCl & Chlorpheniramine Maleate - Orange Flavor', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Electrogreat Energy', 'Instant Energy Booster with Vitamin C & Electrolytes - Orange Flavor', 1.00, 5, 'Triokind Pharmaceutical', '100gm', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Ibuzaal 60ml', 'Ibuprofen & Paracetamol Suspension - Strawberry Flavor', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0);
-('Bougain Gold syrup', 'Lycopene, Multivitamin & Antioxidant Syrup', 1.00, 5, 'Triokind Pharmaceutical', '225 ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
-('Welcon syrup', 'Phenylephrine and Chlorpheniramine Meleate syrup IP', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1)
+INSERT INTO products (name, description, price, category_id, manufacturer, dosage, stock_quantity, image_url, prescription_required, featured) VALUES
+('Welco Juniorn ', 'Effective Pediatric Cough & Cold Syrup with Dextromethorphan, Phenylephrine and Chlorpheniramine', 99.50, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Ibuzaal Suspension', 'Ibuprofen & Paracetamol Oral Suspension - Rapid Relief from Fever, Pain & Discomfort',70 , 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Rebtom-DSR', 'Rabeprazole & Domperidone Capsules - Fast Relief from Acid Reflux & Dyspepsia', 130, 3, 'Triokind Pharmaceutical', '20 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 1),
+('Taskmol-MF', 'Mefenamic Acid & Paracetamol Oral Suspension - Quick Relief from Fever & Pain in Children', 88, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Taskmol-Junior', 'Mefenamic Acid & Paracetamol Suspension - Fast Relief from Fever & Pain', 77, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Taskmol-Plus', 'Aceclofenac & Paracetamol Tablets - Powerful Relief From Pain & Inflammation',77 , 2, 'Triokind Pharmaceutical', '20 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Taskmol-SP', 'Aceclofenac, Paracetamol & Serratiopeptidase - Effective Relief from Pain and Inflammation', 139, 2, 'Triokind Pharmaceutical', '10 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Pinzyme Syrup', 'Fungal Diastase, Pepsin & Digestive Enzymes - Promotes Better Digestion', 190, 4, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Bougain 4G', 'Omega-3 Fatty Acids, Green Tea Extract & Multivitamin Softgel Capsules', 250, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Bougain Softgel', 'Ginseng, Multivitamin & Antioxidant Softgel Capsules', 120, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Bougain Gold', 'Lycopene, Multivitamin & Antioxidant Softgel Capsules', 178, 5, 'Triokind Pharmaceutical', '100 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Aptibon Syrup', 'Cyproheptadine Appetite Stimulant Syrup - Strawberry Flavor', 190, 6, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Hepatask Syrup', 'L-Ornithine L-Aspartate Liver Health Syrup - Mango Flavor', 77, 7, 'Triokind Pharmaceutical', '200ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Holimentin-625', 'Amoxycillin & Potassium Clavulanate Tablets - Antibiotic', 208.54, 8, 'Triokind Pharmaceutical', '100 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+('Platogreat Syrup', 'Ayurvedic Probiotic Digestive Health Syrup', 380, 4, 'Triokind Pharmaceutical', '500ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Walcon Syrup', 'Phenylephrine HCl & Chlorpheniramine Maleate - Orange Flavor', 88, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+('Electrogreat Energy', 'Instant Energy Booster with Vitamin C & Electrolytes - Orange Flavor', 88, 5, 'Triokind Pharmaceutical', '100gm', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+-- ('Ibuzaal 60ml', 'Ibuprofen & Paracetamol Suspension - Strawberry Flavor', 1.00, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0);
+('Bougain Gold syrup', 'Lycopene, Multivitamin & Antioxidant Syrup', 250, 5, 'Triokind Pharmaceutical', '225 ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 0),
+-- ('Welcon syrup', 'Phenylephrine and Chlorpheniramine Meleate syrup IP', 1.00, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1)
+('Hepatask Tablet', 'L-Ornithine L-Aspartate Liver Health - Mango Flavor', 208.54, 7, 'Triokind Pharmaceutical', '10 Tablets', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 0),
+
 
 -- Insert Sample Team Members
 INSERT INTO team_members (name, position, bio, display_order) VALUES
 ('Deepak Narayan', 'Chief Executive Officer', '.', 1),
+('Pawan Narayan', 'Director', '.', 1),
+('Rahul Gupta','Cheif Technical Officer','.',1)
 
 -- Note: This is just a placeholder. Actual password will be hashed by the backend
 INSERT INTO users (first_name, last_name, email, password, role) VALUES
-('Admin', 'User', 'admin@trokind.com', '$2a$10$placeholder', 'admin');
+('Admin', 'User', 'admin@triokind.com', '$2a$10$placeholder', 'admin');
 
 -- Create Indexes for Better Performance
 CREATE INDEX idx_products_category ON products(category_id);
