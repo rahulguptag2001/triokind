@@ -39,7 +39,7 @@ const Footer = () => {
           <p>📧 triokindpharmaceuticalspvtltd@gmail.com</p>
           <p>📞 9582878282</p>
           <p>Office Address- SHOP NO. 3 FIRST FLOOR SEC A-9 PKT-4 CSC MARKET,Narela,110040</p>
-          <p>Permanent Address- </p>
+          <p>Permanent Address- H.NO-44 POCKET-4,SECTOR-A/6 PUNARVAS COLONY, Narela New Delhi,110040 </p>
         </div>
       </div>
       <div className="whatsapp-float">
@@ -55,10 +55,6 @@ const Footer = () => {
 </div>
       <div className="footer-bottom">
         <p>&copy; 2026 Triokind Pharmaceuticals. All rights reserved.</p>
-        <div className="footer-links">
-          <a href="#privacy">Privacy Policy</a>
-          <a href="#terms">Terms of Service</a>
-        </div>
       </div>
     </footer>
   );
