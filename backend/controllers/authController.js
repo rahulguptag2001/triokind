@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import pool from "../config/database.js";
 
-// Register user
+// Register
 export const register = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -27,34 +27,32 @@ export const register = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO users (email, password, first_name, last_name, role)
-       VALUES (?, ?, ?, ?, 'user')`,
-      [email, hashedPassword, firstName, lastName]
+       VALUES (?, ?, ?, ?, ?)`,
+      [email, hashedPassword, firstName, lastName, "user"]
     );
 
+    const user = {
+      id: result.insertId,
+      email,
+      firstName,
+      lastName,
+      role: "user",
+    };
+
     const token = jwt.sign(
-      { id: result.insertId, role: "user" },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // ✅ IMPORTANT: return user + token
-    res.status(201).json({
-      token,
-      user: {
-        id: result.insertId,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        role: "user",
-      },
-    });
+    res.status(201).json({ user, token });
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Login user
+// Login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -69,11 +67,19 @@ export const login = async (req, res) => {
     }
 
     const user = users[0];
-
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      role: user.role,
+    };
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
@@ -81,29 +87,19 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // ✅ IMPORTANT: return user + token
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        role: user.role,
-      },
-    });
+    res.json({ user: safeUser, token });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
-// Get logged-in user profile
+
+// ✅ MUST be exported
 export const getProfile = async (req, res) => {
   try {
     const [users] = await pool.query(
       `SELECT id, email, first_name, last_name, role
-       FROM users
-       WHERE id = ?`,
+       FROM users WHERE id = ?`,
       [req.user.id]
     );
 

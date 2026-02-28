@@ -13,15 +13,19 @@ const Login = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  setError("");
+  setError('');
   setLoading(true);
 
   try {
-    const response = await api.post("/auth/login", formData);
-    login(response.data.user, response.data.token);
-    navigate("/products");
+    const res = await api.post(
+      `${process.env.REACT_APP_API_URL}/auth/login`,
+      formData
+    );
+
+    login(res.data.user, res.data.token);
+    navigate('/products');
   } catch (err) {
-    setError(err.response?.data?.message || "Login failed");
+    setError(err.response?.data?.message || 'Login failed');
   } finally {
     setLoading(false);
   }
@@ -62,5 +66,5 @@ const handleSubmit = async (e) => {
     </div>
   );
 };
-
+console.log("API:", process.env.REACT_APP_API_URL);
 export default Login;
