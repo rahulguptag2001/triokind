@@ -36,7 +36,7 @@ const OrderSuccess = () => {
 
           <div className="help-section">
             <p>Need help? Contact us at:</p>
-            <p>📞 1-800-TROKIND | 📧 support@trokind.com</p>
+            <p>📞 9582878282 | 📧 deepak@triokind.com</p>
           </div>
         </div>
       </div>

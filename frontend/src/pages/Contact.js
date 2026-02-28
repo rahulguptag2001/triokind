@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -95,10 +95,9 @@ const Contact = () => {
           <div className="contact-info-section">
             <h2>Get In Touch</h2>
             <div className="contact-info">
-              <p>📍 123 Pharma Street, Medical City, MC 12345</p>
-              <p>📞 1-800-TROKIND (876-5463)</p>
-              <p>📧 info@trokind.com</p>
-              <p>🕒 Mon-Fri: 9:00 AM - 6:00 PM</p>
+              <p>📍 SHOP NO. 3 FIRST FLOOR SEC A-9 PKT-4 CSC MARKET, Narela, 110040</p>
+              <p>📞 9582878282</p>
+              <p>📧triokindpharmaceuticalspvtltd@gmail.com</p>
             </div>
           </div>
         </div>
