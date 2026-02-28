@@ -8,7 +8,7 @@ import {
   getProfile,
 } from "../controllers/authController.js";
 
-import { auth } from "../middleware/auth.js";
+import { auth ,adminAuth} from "../middleware/auth.js";
 
 const router = express.Router();
 

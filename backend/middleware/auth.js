@@ -1,6 +1,7 @@
 // middleware/auth.js
 import jwt from "jsonwebtoken";
 
+// Authenticate any logged-in user
 export const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -12,9 +13,20 @@ export const auth = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = decoded; // { id, role }
     next();
   } catch (err) {
-    res.status(401).json({ message: "Token is not valid" });
+    return res.status(401).json({ message: "Token is not valid" });
   }
+};
+
+// Authenticate admin-only routes
+export const adminAuth = (req, res, next) => {
+  // First ensure user is authenticated
+  auth(req, res, () => {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  });
 };
