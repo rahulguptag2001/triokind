@@ -2,32 +2,58 @@
 import pool from "../config/database.js";
 
 // Create new order
+import pool from "../config/database.js";
+
 export const createOrder = async (req, res) => {
   try {
-    const { address, totalAmount } = req.body;
+    const userId = req.user.id;
+    const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
 
-    // 🔴 VALIDATION
-    if (!address || address.trim() === "") {
-      return res.status(400).json({ message: "Address is required" });
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
     }
 
-    if (!totalAmount || totalAmount <= 0) {
-      return res.status(400).json({ message: "Invalid total amount" });
-    }
-
-    const [result] = await pool.query(
-      `INSERT INTO orders (user_id, total_amount, address, status)
-       VALUES (?, ?, ?, ?)`,
-      [req.user.id, totalAmount, address, "pending"]
+    // 1️⃣ Create order
+    const [orderResult] = await pool.query(
+      `INSERT INTO orders 
+       (user_id, total_amount, address, city, state, pincode, country, payment_method, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        userId,
+        totalAmount,
+        shippingAddress.address_line1,
+        shippingAddress.city,
+        shippingAddress.state,
+        shippingAddress.postal_code,
+        shippingAddress.country,
+        paymentMethod
+      ]
     );
 
+    const orderId = orderResult.insertId;
+
+    // 2️⃣ Insert order items
+    for (const item of items) {
+      await pool.query(
+        `INSERT INTO order_items (order_id, product_id, quantity, price)
+         VALUES (?, ?, ?, ?)`,
+        [
+          orderId,
+          item.productId,   // ✅ FIXED
+          item.quantity,
+          item.price        // ✅ MUST COME FROM FRONTEND
+        ]
+      );
+    }
+
     res.status(201).json({
-      message: "Order placed successfully",
-      orderId: result.insertId,
+      success: true,
+      orderId
     });
+
   } catch (error) {
     console.error("Create order error:", error);
-    res.status(500).json({ message: "Failed to create order" });
+    res.status(500).json({ message: "Order creation failed" });
   }
 };
 // Get orders for logged-in user
