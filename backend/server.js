@@ -1,21 +1,20 @@
-// server.js - FIXED CORS CONFIGURATION
+// server.js - WITHOUT Cloudinary/Upload Routes
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// Import routes
+// Import routes (NO upload route)
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import contactRoutes from './routes/contact.js';
 import paymentRoutes from './routes/payment.js';
-import uploadRoutes from './routes/upload.js';
 
 dotenv.config();
 
 const app = express();
 
-// ✅ CORS CONFIGURATION - CRITICAL FIX
+// ✅ CORS CONFIGURATION
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
@@ -26,7 +25,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -63,13 +61,12 @@ app.get('/', (req, res) => {
   });
 });
 
-// API Routes
+// API Routes (NO /api/upload)
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/payment', paymentRoutes);
-app.use('/api/upload', uploadRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -88,11 +85,12 @@ app.use((req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ;
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`✅ Allowed origins:`, allowedOrigins);
+  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;
