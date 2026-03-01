@@ -27,7 +27,7 @@ const Team = () => {
       <div className="container">
         <h1>Our Team</h1>
         <p className="team-intro">
-          Meet the dedicated professionals behind Trokind Pharmaceuticals
+          Meet the dedicated professionals behind Triokind Pharmaceuticals
         </p>
 
         {loading ? (
