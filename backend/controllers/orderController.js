@@ -1,8 +1,8 @@
-// controllers/orderController.js - FIXED VERSION
+// controllers/orderController.js - FINAL WORKING VERSION
 import pool from "../config/database.js";
 
 /**
- * CREATE ORDER (COD + Razorpay)
+ * CREATE ORDER (COD + Razorpay) - AUTO-FETCHES PRICE FROM DATABASE IF MISSING
  */
 export const createOrder = async (req, res) => {
   const connection = await pool.getConnection();
@@ -12,8 +12,8 @@ export const createOrder = async (req, res) => {
     const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
 
     console.log('📦 Creating order for user:', userId);
-    console.log('📦 Items:', items);
-    console.log('📦 Shipping:', shippingAddress);
+    console.log('📦 Items:', JSON.stringify(items, null, 2));
+    console.log('📦 Shipping:', JSON.stringify(shippingAddress, null, 2));
 
     // Validation
     if (!items || items.length === 0) {
@@ -53,28 +53,61 @@ export const createOrder = async (req, res) => {
     const orderId = orderResult.insertId;
     console.log('✅ Order created with ID:', orderId);
 
-    // 2️⃣ Insert order items
-    for (const item of items) {
-      if (!item.productId || !item.price || !item.quantity) {
-        throw new Error(`Invalid product data: ${JSON.stringify(item)}`);
+    // 2️⃣ Insert order items - AUTO-FETCH PRICE IF MISSING
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      console.log(`Processing item ${i + 1}:`, item);
+
+      // Validate product ID
+      if (!item.productId && !item.id) {
+        throw new Error(`Item ${i + 1}: Missing productId`);
       }
 
+      // Validate quantity
+      if (!item.quantity || item.quantity <= 0) {
+        throw new Error(`Item ${i + 1}: Invalid quantity`);
+      }
+
+      const productId = item.productId || item.id;
+      let price = item.price;
+
+      // ✅ AUTO-FETCH PRICE FROM DATABASE IF MISSING
+      if (!price || price <= 0) {
+        console.log(`⚠️ Price missing for product ${productId}, fetching from database...`);
+        
+        const [products] = await connection.query(
+          'SELECT price FROM products WHERE id = ?',
+          [productId]
+        );
+        
+        if (products.length === 0) {
+          throw new Error(`Product ${productId} not found in database`);
+        }
+        
+        price = parseFloat(products[0].price);
+        console.log(`✅ Fetched price from database: ₹${price}`);
+      }
+
+      // Insert order item
       await connection.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
          VALUES (?, ?, ?, ?)`,
         [
           orderId,
-          item.productId,
-          item.quantity,
-          item.price
+          productId,
+          parseInt(item.quantity),
+          price
         ]
       );
+
+      console.log(`✅ Item ${i + 1} inserted: Product ${productId}, Qty ${item.quantity}, Price ₹${price}`);
     }
 
-    console.log('✅ Order items inserted');
+    console.log('✅ All order items inserted successfully');
 
     // Commit transaction
     await connection.commit();
+    console.log('✅ Transaction committed');
 
     res.status(201).json({
       success: true,
@@ -83,25 +116,29 @@ export const createOrder = async (req, res) => {
       orderDetails: {
         id: orderId,
         totalAmount,
-        paymentMethod,
-        status: 'pending'
+        paymentMethod: paymentMethod || 'COD',
+        status: 'pending',
+        itemCount: items.length
       }
     });
 
   } catch (error) {
     // Rollback on error
     await connection.rollback();
+    console.log('⚠️ Transaction rolled back');
     
     console.error("❌ Create order error:", error);
-    console.error("❌ Error details:", error.message);
+    console.error("❌ Error stack:", error.stack);
     
     res.status(500).json({ 
       success: false,
       message: "Order creation failed",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   } finally {
     connection.release();
+    console.log('✅ Database connection released');
   }
 };
 
