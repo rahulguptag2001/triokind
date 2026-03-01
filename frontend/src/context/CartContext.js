@@ -46,19 +46,26 @@ useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
       if (existingItem) {
         return prevItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
       
-      return [...prevItems, { ...product, quantity }];
+      return [...prevItems, {
+            productId: product.id,
+            name: product.name,
+            price: parseFloat(product.price), // ← ADD THIS
+            quantity: 1,
+            image_url: product.image_url
+
+    }];
     });
 
     // Trigger cart icon bounce animation
