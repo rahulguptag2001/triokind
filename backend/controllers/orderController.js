@@ -1,9 +1,10 @@
 // controllers/orderController.js
 import pool from "../config/database.js";
 
-// Create new order
-import pool from "../config/database.js";
 
+/**
+ * CREATE ORDER (COD + Razorpay)
+ */
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -15,7 +16,7 @@ export const createOrder = async (req, res) => {
 
     // 1️⃣ Create order
     const [orderResult] = await pool.query(
-      `INSERT INTO orders 
+      `INSERT INTO orders
        (user_id, total_amount, address, city, state, pincode, country, payment_method, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
       [
@@ -34,14 +35,18 @@ export const createOrder = async (req, res) => {
 
     // 2️⃣ Insert order items
     for (const item of items) {
+      if (!item.productId || !item.price) {
+        throw new Error("Invalid product data");
+      }
+
       await pool.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
          VALUES (?, ?, ?, ?)`,
         [
           orderId,
-          item.productId,   // ✅ FIXED
+          item.productId,
           item.quantity,
-          item.price        // ✅ MUST COME FROM FRONTEND
+          item.price
         ]
       );
     }
