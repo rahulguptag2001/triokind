@@ -3,6 +3,7 @@ import crypto from "crypto";
 
 /**
  * CREATE ORDER (COD + Razorpay)
+ * CREATE ORDER (COD + Razorpay) 
  */
 export const createOrder = async (req, res) => {
   const connection = await pool.getConnection();
@@ -18,6 +19,7 @@ export const createOrder = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
     } = req.body;
+
 
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
@@ -73,6 +75,23 @@ export const createOrder = async (req, res) => {
     }
 
     await connection.beginTransaction();
+    // Create address for this order
+    const [addressResult] = await connection.query(
+      `INSERT INTO addresses
+       (user_id, address_line1, address_line2, city, state, postal_code, country)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        userId,
+        shippingAddress.address_line1,
+        shippingAddress.address_line2 || null,
+        shippingAddress.city,
+        shippingAddress.state,
+        shippingAddress.postal_code,
+        shippingAddress.country || "India",
+      ]
+    );
+
+    const addressId = addressResult.insertId;
 
     // Create address for this order
     const [addressResult] = await connection.query(
