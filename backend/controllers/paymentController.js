@@ -96,14 +96,15 @@ export const verifyPayment = async (req, res) => {
       const [orderResult] = await connection.query(
         `INSERT INTO orders
          (user_id, address_id, total_amount, payment_method, payment_status, status,
-          razorpay_order_id, razorpay_payment_id)
-         VALUES (?, ?, ?, 'razorpay', 'completed', 'processing', ?, ?)`,
+          razorpay_order_id, razorpay_payment_id, razorpay_signature)
+         VALUES (?, ?, ?, 'razorpay', 'completed', 'processing', ?, ?, ?)`,
         [
           userId,
           addressId,
           totalAmount,
           razorpay_order_id,
           razorpay_payment_id,
+          razorpay_signature,
         ]
       );
 
