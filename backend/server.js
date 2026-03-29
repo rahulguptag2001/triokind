@@ -26,7 +26,12 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
+
+      // Allow any Vercel preview deployment automatically
+      const isVercel = origin.endsWith('.vercel.app');
+      const isAllowed = allowedOrigins.indexOf(origin) !== -1;
+
+      if (isAllowed || isVercel) {
         callback(null, true);
       } else {
         console.log('❌ Blocked by CORS:', origin);
@@ -85,8 +90,6 @@ app.use((req, res) => {
   });
 });
 
-// FIX: Added fallback port — without this the server silently fails to start
-// when PORT is not set in .env
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
