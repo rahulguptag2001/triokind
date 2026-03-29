@@ -1,8 +1,8 @@
+// pages/Register.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from "../api/axios";
+import api from '../api/axios';
 import { useCart } from '../context/CartContext';
-
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,32 +10,31 @@ const Register = () => {
     lastName: '',
     email: '',
     password: '',
-    phone: ''
+    phone: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useCart();
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    const res = await api.post(
-      `${process.env.REACT_APP_API_URL}/auth/register`,
-      formData
-    );
-
-    login(res.data.user, res.data.token);
-    navigate('/products');
-  } catch (err) {
-    setError(err.response?.data?.message || 'Registration failed');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      // FIX: api already has baseURL set — don't prepend REACT_APP_API_URL again
+      // Old: api.post(`${process.env.REACT_APP_API_URL}/auth/register`, ...)
+      // That caused double URL: https://backend.com/apihttps://backend.com/api/auth/register
+      const res = await api.post('/auth/register', formData);
+      login(res.data.user, res.data.token);
+      navigate('/products');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -48,7 +47,7 @@ const Register = () => {
             <input
               type="text"
               value={formData.firstName}
-              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               required
             />
           </div>
@@ -57,7 +56,7 @@ const Register = () => {
             <input
               type="text"
               value={formData.lastName}
-              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
               required
             />
           </div>
@@ -66,7 +65,7 @@ const Register = () => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
             />
           </div>
@@ -75,7 +74,7 @@ const Register = () => {
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -83,7 +82,7 @@ const Register = () => {
             <input
               type="password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
               minLength="6"
             />

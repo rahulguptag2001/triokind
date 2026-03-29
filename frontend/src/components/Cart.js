@@ -1,3 +1,4 @@
+// components/Cart.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -31,6 +32,7 @@ const Cart = () => {
         <div className="cart-content">
           <div className="cart-items">
             {cartItems.map(item => (
+              // FIX: item.id now exists because CartContext stores id correctly
               <div key={item.id} className="cart-item">
                 <div className="item-image">
                   {item.image_url ? (
@@ -49,8 +51,9 @@ const Cart = () => {
                   <span>{item.quantity}</span>
                   <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
                 </div>
+                {/* FIX: was $ (dollar sign), now ₹ (rupee) */}
                 <div className="item-total">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ₹{(item.price * item.quantity).toFixed(2)}
                 </div>
                 <button onClick={() => removeFromCart(item.id)} className="remove-btn">
                   Remove
@@ -58,6 +61,7 @@ const Cart = () => {
               </div>
             ))}
           </div>
+
           <div className="cart-summary">
             <h3>Order Summary</h3>
             <div className="summary-row">
@@ -66,7 +70,7 @@ const Cart = () => {
             </div>
             <div className="summary-row">
               <span>Shipping:</span>
-              <span>₹0.00</span>
+              <span>₹5.00</span>
             </div>
             <div className="summary-row total">
               <span>Total:</span>
