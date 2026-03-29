@@ -1,25 +1,25 @@
+// controllers/orderController.js
 import pool from "../config/database.js";
-import crypto from "crypto";
 
 /**
- * CREATE ORDER (COD + Razorpay)
+ * CREATE ORDER — COD only.
+ *
+ * Razorpay orders MUST go through:
+ *   POST /api/payment/create-order  → frontend payment UI →
+ *   POST /api/payment/verify        → creates the DB order there.
+ *
+ * Having Razorpay signature verification duplicated here caused two
+ * separate order-creation paths for online payments, which could lead
+ * to double orders and inconsistent payment_status values.
  */
 export const createOrder = async (req, res) => {
   const connection = await pool.getConnection();
 
   try {
     const userId = req.user.id;
-    const {
-      items,
-      shippingAddress,
-      paymentMethod,
-      totalAmount,
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+    const { items, shippingAddress, totalAmount } = req.body;
 
-    // Validation
+    // ── Validation ────────────────────────────────────────────────────────────
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
@@ -37,46 +37,16 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const normalizedPaymentMethod = (paymentMethod || "cod").toLowerCase();
-    const isRazorpay = normalizedPaymentMethod === "razorpay";
-    let paymentStatus = "pending";
-
-    if (isRazorpay && (!razorpay_order_id || !razorpay_payment_id)) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Razorpay order/payment IDs are required for online payment orders",
-      });
+    if (!totalAmount || isNaN(Number(totalAmount)) || Number(totalAmount) <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid total amount is required" });
     }
 
-    if (isRazorpay) {
-      if (!razorpay_signature) {
-        return res.status(400).json({
-          success: false,
-          message: "Razorpay signature is required for online payment orders",
-        });
-      }
-
-      const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
-      const expectedSign = crypto
-        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-        .update(sign)
-        .digest("hex");
-
-      if (razorpay_signature !== expectedSign) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid Razorpay signature",
-        });
-      }
-
-      paymentStatus = "completed";
-    }
-
-    // Start transaction
+    // ── Transaction ──────────────────────────────────────────────────────────
     await connection.beginTransaction();
 
-    // Create address for this order
+    // Always create a fresh address snapshot for the order
     const [addressResult] = await connection.query(
       `INSERT INTO addresses
        (user_id, address_line1, address_line2, city, state, postal_code, country)
@@ -94,51 +64,35 @@ export const createOrder = async (req, res) => {
 
     const addressId = addressResult.insertId;
 
-    // Create order
+    // Create the order (COD only)
     const [orderResult] = await connection.query(
       `INSERT INTO orders
-       (user_id, address_id, total_amount, payment_method, payment_status, status,
-        razorpay_order_id, razorpay_payment_id, razorpay_signature)
-       VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
-      [
-        userId,
-        addressId,
-        totalAmount,
-        normalizedPaymentMethod,
-        paymentStatus,
-        razorpay_order_id || null,
-        razorpay_payment_id || null,
-        razorpay_signature || null,
-      ]
+       (user_id, address_id, total_amount, payment_method, payment_status, status)
+       VALUES (?, ?, ?, 'cod', 'pending', 'pending')`,
+      [userId, addressId, totalAmount]
     );
 
     const orderId = orderResult.insertId;
 
-    // Create order items and update stock
+    // Insert order items & decrement stock
     for (const item of items) {
       const productId = item.productId || item.id;
       const quantity = parseInt(item.quantity, 10);
 
-      if (!productId) {
-        throw new Error("Missing productId in cart item");
-      }
-
-      if (!quantity || quantity <= 0) {
+      if (!productId) throw new Error("Missing productId in cart item");
+      if (!quantity || quantity <= 0)
         throw new Error(`Invalid quantity for product ${productId}`);
-      }
 
       const [products] = await connection.query(
         "SELECT price, stock_quantity FROM products WHERE id = ?",
         [productId]
       );
 
-      if (products.length === 0) {
+      if (products.length === 0)
         throw new Error(`Product ${productId} not found`);
-      }
 
-      if (products[0].stock_quantity < quantity) {
+      if (products[0].stock_quantity < quantity)
         throw new Error(`Insufficient stock for product ${productId}`);
-      }
 
       await connection.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
@@ -209,7 +163,9 @@ export const getOrderById = async (req, res) => {
     );
 
     if (orders.length === 0) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     const [items] = await pool.query(
@@ -223,13 +179,7 @@ export const getOrderById = async (req, res) => {
       [orderId]
     );
 
-    res.json({
-      success: true,
-      order: {
-        ...orders[0],
-        items,
-      },
-    });
+    res.json({ success: true, order: { ...orders[0], items } });
   } catch (error) {
     console.error("Get order by ID error:", error);
     res.status(500).json({ success: false, message: "Failed to fetch order" });
@@ -253,7 +203,9 @@ export const updateOrderStatus = async (req, res) => {
     ];
 
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
     }
 
     const [result] = await pool.query(
@@ -262,13 +214,17 @@ export const updateOrderStatus = async (req, res) => {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
     console.error("Update order status error:", error);
-    res.status(500).json({ success: false, message: "Failed to update order status" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update order status" });
   }
 };
 

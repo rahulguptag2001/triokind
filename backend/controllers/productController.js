@@ -1,7 +1,9 @@
-// controllers/productController.js - Product Management Logic
+// controllers/productController.js
 import pool from "../config/database.js";
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get all products with optional filters
+// ─────────────────────────────────────────────────────────────────────────────
 export const getAllProducts = async (req, res) => {
   try {
     const { category, search, featured } = req.query;
@@ -38,16 +40,16 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get single product by ID
+// ─────────────────────────────────────────────────────────────────────────────
 export const getProductById = async (req, res) => {
   try {
     const [products] = await pool.query(
-      `
-      SELECT p.*, c.name AS category_name
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.id = ?
-      `,
+      `SELECT p.*, c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.id = ?`,
       [req.params.id]
     );
 
@@ -62,7 +64,9 @@ export const getProductById = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get all categories
+// ─────────────────────────────────────────────────────────────────────────────
 export const getCategories = async (req, res) => {
   try {
     const [categories] = await pool.query(
@@ -75,17 +79,17 @@ export const getCategories = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get products by category
+// ─────────────────────────────────────────────────────────────────────────────
 export const getProductsByCategory = async (req, res) => {
   try {
     const [products] = await pool.query(
-      `
-      SELECT p.*, c.name AS category_name
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.category_id = ?
-      ORDER BY p.name
-      `,
+      `SELECT p.*, c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.category_id = ?
+       ORDER BY p.name`,
       [req.params.categoryId]
     );
 
@@ -96,18 +100,18 @@ export const getProductsByCategory = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Get featured products
+// ─────────────────────────────────────────────────────────────────────────────
 export const getFeaturedProducts = async (req, res) => {
   try {
     const [products] = await pool.query(
-      `
-      SELECT p.*, c.name AS category_name
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.featured = true
-      ORDER BY p.created_at DESC
-      LIMIT 6
-      `
+      `SELECT p.*, c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.featured = true
+       ORDER BY p.created_at DESC
+       LIMIT 6`
     );
 
     res.json(products);
@@ -117,7 +121,9 @@ export const getFeaturedProducts = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Create product (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -134,11 +140,10 @@ export const createProduct = async (req, res) => {
     } = req.body;
 
     const [result] = await pool.query(
-      `
-      INSERT INTO products
-      (name, description, price, image_url, category_id, stock_quantity, manufacturer, dosage, prescription_required, featured)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
+      `INSERT INTO products
+       (name, description, price, image_url, category_id, stock_quantity,
+        manufacturer, dosage, prescription_required, featured)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         description,
@@ -163,25 +168,51 @@ export const createProduct = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Update product (admin only)
+//
+// FIX: The original code built the SET clause directly from Object.keys(req.body),
+// which is a SQL injection vulnerability — an attacker could inject arbitrary
+// column names (e.g. "id=1; DROP TABLE products; --").
+// We now validate every key against an explicit whitelist before touching the DB.
+// ─────────────────────────────────────────────────────────────────────────────
+const UPDATABLE_PRODUCT_FIELDS = new Set([
+  "name",
+  "description",
+  "price",
+  "image_url",
+  "category_id",
+  "stock_quantity",
+  "manufacturer",
+  "dosage",
+  "prescription_required",
+  "featured",
+]);
+
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
 
-    if (Object.keys(updates).length === 0) {
+    if (!updates || Object.keys(updates).length === 0) {
       return res.status(400).json({ message: "No fields to update" });
     }
 
-    const fields = Object.keys(updates)
-      .map((key) => `${key} = ?`)
-      .join(", ");
-    const values = [...Object.values(updates), id];
-
-    await pool.query(
-      `UPDATE products SET ${fields} WHERE id = ?`,
-      values
+    // Only keep keys that are in the whitelist
+    const safeKeys = Object.keys(updates).filter((key) =>
+      UPDATABLE_PRODUCT_FIELDS.has(key)
     );
+
+    if (safeKeys.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No valid fields provided for update" });
+    }
+
+    const fields = safeKeys.map((key) => `${key} = ?`).join(", ");
+    const values = [...safeKeys.map((key) => updates[key]), id];
+
+    await pool.query(`UPDATE products SET ${fields} WHERE id = ?`, values);
 
     res.json({ message: "Product updated successfully" });
   } catch (error) {
@@ -190,13 +221,12 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Delete product (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
 export const deleteProduct = async (req, res) => {
   try {
-    await pool.query("DELETE FROM products WHERE id = ?", [
-      req.params.id,
-    ]);
-
+    await pool.query("DELETE FROM products WHERE id = ?", [req.params.id]);
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Delete product error:", error);
