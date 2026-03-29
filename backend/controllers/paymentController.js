@@ -13,9 +13,17 @@ const razorpay = new Razorpay({
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { amount } = req.body; // Amount in rupees
+    const numericAmount = Number(amount);
+
+    if (!numericAmount || Number.isNaN(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid amount is required",
+      });
+    }
 
     const options = {
-      amount: Math.round(amount * 100), // paise
+      amount: Math.round(numericAmount * 100), // paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
@@ -73,7 +81,16 @@ export const verifyPayment = async (req, res) => {
       // Create address if not exists
       let addressId;
       if (shippingAddress.id) {
-        addressId = shippingAddress.id;
+        const [addressRows] = await connection.query(
+          "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
+          [shippingAddress.id, userId]
+        );
+
+        if (!addressRows.length) {
+          throw new Error("Invalid address for this user");
+        }
+
+        addressId = addressRows[0].id;
       } else {
         const [addressResult] = await connection.query(
           `INSERT INTO addresses 
@@ -96,14 +113,15 @@ export const verifyPayment = async (req, res) => {
       const [orderResult] = await connection.query(
         `INSERT INTO orders
          (user_id, address_id, total_amount, payment_method, payment_status, status,
-          razorpay_order_id, razorpay_payment_id)
-         VALUES (?, ?, ?, 'razorpay', 'completed', 'processing', ?, ?)`,
+          razorpay_order_id, razorpay_payment_id, razorpay_signature)
+         VALUES (?, ?, ?, 'razorpay', 'completed', 'processing', ?, ?, ?)`,
         [
           userId,
           addressId,
           totalAmount,
           razorpay_order_id,
           razorpay_payment_id,
+          razorpay_signature,
         ]
       );
 

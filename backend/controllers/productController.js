@@ -124,6 +124,7 @@ export const createProduct = async (req, res) => {
       name,
       description,
       price,
+      image_url,
       category_id,
       stock_quantity,
       manufacturer,
@@ -135,13 +136,14 @@ export const createProduct = async (req, res) => {
     const [result] = await pool.query(
       `
       INSERT INTO products
-      (name, description, price, category_id, stock_quantity, manufacturer, dosage, prescription_required, featured)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (name, description, price, image_url, category_id, stock_quantity, manufacturer, dosage, prescription_required, featured)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         name,
         description,
         price,
+        image_url || null,
         category_id,
         stock_quantity,
         manufacturer,

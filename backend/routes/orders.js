@@ -23,19 +23,19 @@ router.post("/", auth, createOrder);
 // @access  Private
 router.get("/", auth, getUserOrders);
 
-// @route   GET /api/orders/:id
-// @desc    Get single order
-// @access  Private
-router.get("/:id", auth, getOrderById);
+// @route   GET /api/orders/admin/all
+// @desc    Get all orders
+// @access  Private/Admin
+router.get("/admin/all", adminAuth, getAllOrders);
 
 // @route   PUT /api/orders/:id/status
 // @desc    Update order status
 // @access  Private/Admin
 router.put("/:id/status", adminAuth, updateOrderStatus);
 
-// @route   GET /api/orders/admin/all
-// @desc    Get all orders
-// @access  Private/Admin
-router.get("/admin/all", adminAuth, getAllOrders);
+// @route   GET /api/orders/:id
+// @desc    Get single order
+// @access  Private
+router.get("/:id", auth, getOrderById);
 
 export default router;

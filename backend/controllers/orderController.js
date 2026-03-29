@@ -1,144 +1,171 @@
-// controllers/orderController.js - FINAL WORKING VERSION
 import pool from "../config/database.js";
+import crypto from "crypto";
 
 /**
- * CREATE ORDER (COD + Razorpay) - AUTO-FETCHES PRICE FROM DATABASE IF MISSING
+ * CREATE ORDER (COD + Razorpay)
  */
 export const createOrder = async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     const userId = req.user.id;
-    const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+    const {
+      items,
+      shippingAddress,
+      paymentMethod,
+      totalAmount,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = req.body;
 
-    console.log('📦 Creating order for user:', userId);
-    console.log('📦 Items:', JSON.stringify(items, null, 2));
-    console.log('📦 Shipping:', JSON.stringify(shippingAddress, null, 2));
-
-    // Validation
     if (!items || items.length === 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({ success: false, message: "Cart is empty" });
+    }
+
+    if (
+      !shippingAddress ||
+      !shippingAddress.address_line1 ||
+      !shippingAddress.city ||
+      !shippingAddress.state ||
+      !shippingAddress.postal_code
+    ) {
+      return res.status(400).json({
         success: false,
-        message: "Cart is empty" 
+        message: "Complete shipping address is required",
       });
     }
 
-    if (!shippingAddress || !shippingAddress.address_line1) {
-      return res.status(400).json({ 
+    const normalizedPaymentMethod = (paymentMethod || "cod").toLowerCase();
+    const isRazorpay = normalizedPaymentMethod === "razorpay";
+    let paymentStatus = "pending";
+
+    if (isRazorpay && (!razorpay_order_id || !razorpay_payment_id)) {
+      return res.status(400).json({
         success: false,
-        message: "Shipping address is required" 
+        message:
+          "Razorpay order/payment IDs are required for online payment orders",
       });
     }
 
-    // Start transaction
+    if (isRazorpay) {
+      if (!razorpay_signature) {
+        return res.status(400).json({
+          success: false,
+          message: "Razorpay signature is required for online payment orders",
+        });
+      }
+
+      const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
+      const expectedSign = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(sign)
+        .digest("hex");
+
+      if (razorpay_signature !== expectedSign) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Razorpay signature",
+        });
+      }
+
+      paymentStatus = "completed";
+    }
+
     await connection.beginTransaction();
 
-    // 1️⃣ Create order
-    const [orderResult] = await connection.query(
-      `INSERT INTO orders
-       (user_id, total_amount, address, city, state, pincode, country, payment_method, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+    // Create address for this order
+    const [addressResult] = await connection.query(
+      `INSERT INTO addresses
+       (user_id, address_line1, address_line2, city, state, postal_code, country)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         userId,
-        totalAmount,
         shippingAddress.address_line1,
-        shippingAddress.city || '',
-        shippingAddress.state || '',
-        shippingAddress.postal_code || '',
-        shippingAddress.country || 'India',
-        paymentMethod || 'COD'
+        shippingAddress.address_line2 || null,
+        shippingAddress.city,
+        shippingAddress.state,
+        shippingAddress.postal_code,
+        shippingAddress.country || "India",
+      ]
+    );
+
+    const addressId = addressResult.insertId;
+
+    // Create order
+    const [orderResult] = await connection.query(
+      `INSERT INTO orders
+       (user_id, address_id, total_amount, payment_method, payment_status, status,
+        razorpay_order_id, razorpay_payment_id, razorpay_signature)
+       VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
+      [
+        userId,
+        addressId,
+        totalAmount,
+        normalizedPaymentMethod,
+        paymentStatus,
+        razorpay_order_id || null,
+        razorpay_payment_id || null,
+        razorpay_signature || null,
       ]
     );
 
     const orderId = orderResult.insertId;
-    console.log('✅ Order created with ID:', orderId);
 
-    // 2️⃣ Insert order items - AUTO-FETCH PRICE IF MISSING
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      console.log(`Processing item ${i + 1}:`, item);
-
-      // Validate product ID
-      if (!item.productId && !item.id) {
-        throw new Error(`Item ${i + 1}: Missing productId`);
-      }
-
-      // Validate quantity
-      if (!item.quantity || item.quantity <= 0) {
-        throw new Error(`Item ${i + 1}: Invalid quantity`);
-      }
-
+    // Create order items and update stock
+    for (const item of items) {
       const productId = item.productId || item.id;
-      let price = item.price;
+      const quantity = parseInt(item.quantity, 10);
 
-      // ✅ AUTO-FETCH PRICE FROM DATABASE IF MISSING
-      if (!price || price <= 0) {
-        console.log(`⚠️ Price missing for product ${productId}, fetching from database...`);
-        
-        const [products] = await connection.query(
-          'SELECT price FROM products WHERE id = ?',
-          [productId]
-        );
-        
-        if (products.length === 0) {
-          throw new Error(`Product ${productId} not found in database`);
-        }
-        
-        price = parseFloat(products[0].price);
-        console.log(`✅ Fetched price from database: ₹${price}`);
+      if (!productId) {
+        throw new Error("Missing productId in cart item");
       }
 
-      // Insert order item
+      if (!quantity || quantity <= 0) {
+        throw new Error(`Invalid quantity for product ${productId}`);
+      }
+
+      const [products] = await connection.query(
+        "SELECT price, stock_quantity FROM products WHERE id = ?",
+        [productId]
+      );
+
+      if (products.length === 0) {
+        throw new Error(`Product ${productId} not found`);
+      }
+
+      if (products[0].stock_quantity < quantity) {
+        throw new Error(`Insufficient stock for product ${productId}`);
+      }
+
       await connection.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
          VALUES (?, ?, ?, ?)`,
-        [
-          orderId,
-          productId,
-          parseInt(item.quantity),
-          price
-        ]
+        [orderId, productId, quantity, products[0].price]
       );
 
-      console.log(`✅ Item ${i + 1} inserted: Product ${productId}, Qty ${item.quantity}, Price ₹${price}`);
+      await connection.query(
+        `UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?`,
+        [quantity, productId]
+      );
     }
 
-    console.log('✅ All order items inserted successfully');
-
-    // Commit transaction
     await connection.commit();
-    console.log('✅ Transaction committed');
 
     res.status(201).json({
       success: true,
-      message: 'Order created successfully',
+      message: "Order created successfully",
       orderId,
-      orderDetails: {
-        id: orderId,
-        totalAmount,
-        paymentMethod: paymentMethod || 'COD',
-        status: 'pending',
-        itemCount: items.length
-      }
     });
-
   } catch (error) {
-    // Rollback on error
     await connection.rollback();
-    console.log('⚠️ Transaction rolled back');
-    
-    console.error("❌ Create order error:", error);
-    console.error("❌ Error stack:", error.stack);
-    
-    res.status(500).json({ 
+    console.error("Create order error:", error);
+    res.status(500).json({
       success: false,
-      message: "Order creation failed",
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      message: error.message || "Order creation failed",
     });
   } finally {
     connection.release();
-    console.log('✅ Database connection released');
   }
 };
 
@@ -150,27 +177,19 @@ export const getUserOrders = async (req, res) => {
     const userId = req.user.id;
 
     const [orders] = await pool.query(
-      `SELECT 
+      `SELECT
         o.*,
-        (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count
-       FROM orders o 
-       WHERE o.user_id = ? 
-       ORDER BY o.created_at DESC`,
+        (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) AS item_count
+       FROM orders o
+       WHERE o.user_id = ?
+       ORDER BY o.order_date DESC`,
       [userId]
     );
 
-    console.log(`✅ Found ${orders.length} orders for user ${userId}`);
-
-    res.json({
-      success: true,
-      orders
-    });
+    res.json({ success: true, orders });
   } catch (error) {
-    console.error("❌ Get user orders error:", error);
-    res.status(500).json({ 
-      success: false,
-      message: "Failed to fetch orders" 
-    });
+    console.error("Get user orders error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
   }
 };
 
@@ -182,24 +201,21 @@ export const getOrderById = async (req, res) => {
     const orderId = req.params.id;
     const userId = req.user.id;
 
-    // Get order
     const [orders] = await pool.query(
       `SELECT * FROM orders WHERE id = ? AND user_id = ?`,
       [orderId, userId]
     );
 
     if (orders.length === 0) {
-      return res.status(404).json({ 
-        success: false,
-        message: "Order not found" 
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    // Get order items with product details
     const [items] = await pool.query(
-      `SELECT 
+      `SELECT
         oi.*,
-        p.name as product_name,
+        p.name AS product_name,
         p.image_url
        FROM order_items oi
        JOIN products p ON oi.product_id = p.id
@@ -211,15 +227,12 @@ export const getOrderById = async (req, res) => {
       success: true,
       order: {
         ...orders[0],
-        items
-      }
+        items,
+      },
     });
   } catch (error) {
-    console.error("❌ Get order by ID error:", error);
-    res.status(500).json({ 
-      success: false,
-      message: "Failed to fetch order" 
-    });
+    console.error("Get order by ID error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch order" });
   }
 };
 
@@ -231,39 +244,31 @@ export const updateOrderStatus = async (req, res) => {
     const { status } = req.body;
     const orderId = req.params.id;
 
-    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-    
+    const validStatuses = [
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ 
-        success: false,
-        message: "Invalid status" 
-      });
+      return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    const [result] = await pool.query(
-      `UPDATE orders SET status = ? WHERE id = ?`,
-      [status, orderId]
-    );
+    const [result] = await pool.query(`UPDATE orders SET status = ? WHERE id = ?`, [
+      status,
+      orderId,
+    ]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ 
-        success: false,
-        message: "Order not found" 
-      });
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    console.log(`✅ Order ${orderId} status updated to ${status}`);
-
-    res.json({ 
-      success: true,
-      message: "Order status updated successfully" 
-    });
+    res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-    console.error("❌ Update order status error:", error);
-    res.status(500).json({ 
-      success: false,
-      message: "Failed to update order status" 
-    });
+    console.error("Update order status error:", error);
+    res.status(500).json({ success: false, message: "Failed to update order status" });
   }
 };
 
@@ -273,28 +278,21 @@ export const updateOrderStatus = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const [orders] = await pool.query(
-      `SELECT 
+      `SELECT
         o.*,
-        u.name as customer_name,
-        u.email as customer_email,
-        (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count
+        u.first_name,
+        u.last_name,
+        u.email AS customer_email,
+        (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) AS item_count
        FROM orders o
        LEFT JOIN users u ON o.user_id = u.id
-       ORDER BY o.created_at DESC`
+       ORDER BY o.order_date DESC`
     );
 
-    console.log(`✅ Retrieved ${orders.length} orders (admin)`);
-
-    res.json({
-      success: true,
-      orders
-    });
+    res.json({ success: true, orders });
   } catch (error) {
-    console.error("❌ Get all orders error:", error);
-    res.status(500).json({ 
-      success: false,
-      message: "Failed to fetch orders" 
-    });
+    console.error("Get all orders error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
   }
 };
 
@@ -303,5 +301,5 @@ export default {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  getAllOrders
+  getAllOrders,
 };
