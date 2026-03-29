@@ -124,7 +124,7 @@ INSERT INTO categories (name, description) VALUES
 
 -- Insert Sample Products
 INSERT INTO products (name, description, price, category_id, manufacturer, dosage, stock_quantity, image_url, prescription_required, featured) VALUES
-('Welco Juniorn ', 'Effective Pediatric Cough & Cold Syrup with Dextromethorphan, Phenylephrine and Chlorpheniramine', 99.50, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
+('Welcon Junior ', 'Effective Pediatric Cough & Cold Syrup with Dextromethorphan, Phenylephrine and Chlorpheniramine', 99.50, 1, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
 ('Ibuzaal Suspension', 'Ibuprofen & Paracetamol Oral Suspension - Rapid Relief from Fever, Pain & Discomfort',70 , 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),
 ('Rebtom-DSR', 'Rabeprazole & Domperidone Capsules - Fast Relief from Acid Reflux & Dyspepsia', 130, 3, 'Triokind Pharmaceutical', '20 Capsules', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 1, 1),
 ('Taskmol-MF', 'Mefenamic Acid & Paracetamol Oral Suspension - Quick Relief from Fever & Pain in Children', 88, 2, 'Triokind Pharmaceutical', '60ml', 100, 'UPLOAD_IMAGE_VIA_ADMIN', 0, 1),

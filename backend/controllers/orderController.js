@@ -3,7 +3,6 @@ import crypto from "crypto";
 
 /**
  * CREATE ORDER (COD + Razorpay)
- * CREATE ORDER (COD + Razorpay) 
  */
 export const createOrder = async (req, res) => {
   const connection = await pool.getConnection();
@@ -20,7 +19,7 @@ export const createOrder = async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-
+    // Validation
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
@@ -74,24 +73,8 @@ export const createOrder = async (req, res) => {
       paymentStatus = "completed";
     }
 
+    // Start transaction
     await connection.beginTransaction();
-    // Create address for this order
-    const [addressResult] = await connection.query(
-      `INSERT INTO addresses
-       (user_id, address_line1, address_line2, city, state, postal_code, country)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        userId,
-        shippingAddress.address_line1,
-        shippingAddress.address_line2 || null,
-        shippingAddress.city,
-        shippingAddress.state,
-        shippingAddress.postal_code,
-        shippingAddress.country || "India",
-      ]
-    );
-
-    const addressId = addressResult.insertId;
 
     // Create address for this order
     const [addressResult] = await connection.query(
@@ -226,9 +209,7 @@ export const getOrderById = async (req, res) => {
     );
 
     if (orders.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     const [items] = await pool.query(
@@ -275,10 +256,10 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    const [result] = await pool.query(`UPDATE orders SET status = ? WHERE id = ?`, [
-      status,
-      orderId,
-    ]);
+    const [result] = await pool.query(
+      "UPDATE orders SET status = ? WHERE id = ?",
+      [status, orderId]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: "Order not found" });
