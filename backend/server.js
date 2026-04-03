@@ -97,5 +97,16 @@ app.listen(PORT, () => {
   console.log(`✅ Allowed origins:`, allowedOrigins);
   console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
 });
-
+if (process.env.NODE_ENV === 'production') {
+  setInterval(() => {
+    fetch(`https://triokind-backend.onrender.com/`)
+      .then(() => console.log('✅ Keep-alive ping sent'))
+      .catch((err) => console.error('Keep-alive failed:', err.message));
+  }, 10 * 60 * 1000); // every 10 minutes
+}
+console.log('📧 Email config:', {
+  user: process.env.GMAIL_USER ? '✅ set' : '❌ missing',
+  pass: process.env.GMAIL_APP_PASSWORD ? '✅ set' : '❌ missing',
+  admin: process.env.ADMIN_EMAIL ? '✅ set' : '❌ missing',
+});
 export default app;
