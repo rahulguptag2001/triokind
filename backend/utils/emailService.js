@@ -1,6 +1,10 @@
 // utils/emailService.js
 import nodemailer from "nodemailer";
-//phqh ydwz txrr qanq
+import dns from "dns";
+
+// Force Node.js to always prefer IPv4 — Render cannot reach Gmail over IPv6
+dns.setDefaultResultOrder("ipv4first");
+
 export const sendOrderNotification = async ({
   orderId,
   customerName,
@@ -19,15 +23,17 @@ export const sendOrderNotification = async ({
       return;
     }
 
-    // FIX: Force IPv4 — Render cannot reach Gmail over IPv6
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",   // explicit host instead of service:"gmail"
-      port: 465,
-      secure: true,             // SSL on port 465
-      family: 4,                // force IPv4
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
@@ -143,7 +149,6 @@ export const sendOrderNotification = async ({
 
     console.log(`✅ Order notification email sent for Order #${orderId}`);
   } catch (error) {
-    // Never crash the order flow because of email failure
     console.error("❌ Failed to send order notification email:", error.message);
   }
 };
